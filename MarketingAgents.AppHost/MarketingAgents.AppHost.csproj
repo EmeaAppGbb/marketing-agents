@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Sdk Name="Aspire.AppHost.Sdk" Version="9.5.1" />
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <UserSecretsId>bf8c901b-bfc3-44ee-a602-f62881fa97da</UserSecretsId>
+    <NoWarn>$(NoWarn);ASPIRECOSMOSDB001</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" />
+    <PackageReference Include="Aspire.Hosting.Azure.CosmosDB" />
+    <PackageReference Include="Aspire.Hosting.Redis" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MarketingAgents.Api\MarketingAgents.Api.csproj" />
+    <ProjectReference Include="..\MarketingAgents.AgentHost\MarketingAgents.AgentHost.csproj" />
+    <ProjectReference Include="..\MarketingAgents.ServiceDefaults\MarketingAgents.ServiceDefaults.csproj" IsAspireSharedProject="true" IsAspireProjectResource="false" />
+  </ItemGroup>
+
+</Project>

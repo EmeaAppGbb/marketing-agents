@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\MarketingAgents.ServiceDefaults\MarketingAgents.ServiceDefaults.csproj" IsAspireSharedProject="true" />
+  </ItemGroup>
+
+</Project>

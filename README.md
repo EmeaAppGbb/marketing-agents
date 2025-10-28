@@ -1,7 +1,156 @@
 
-# spec2cloud
+# Marketing Agents
 
-**Spec2Cloud** is an AI-powered development workflow that transforms high-level product ideas into production-ready applications deployed on Azure—using specialized GitHub Copilot agents working together.
+A web application for marketing experts to generate and manage comprehensive marketing campaigns using AI Agents powered by the Microsoft Agent Framework.
+
+## Architecture
+
+This project uses .NET 9, ASP.NET Core Minimal APIs, and .NET Aspire for local development orchestration.
+
+### Projects
+
+- **MarketingAgents.AppHost** - .NET Aspire orchestration project for local development
+- **MarketingAgents.Api** - Backend API service using ASP.NET Core Minimal APIs
+- **MarketingAgents.AgentHost** - Dedicated agent execution and orchestration service
+- **MarketingAgents.ServiceDefaults** - Shared service defaults for telemetry, service discovery, and resilience
+
+### Technology Stack
+
+- **.NET 9** - Latest .NET platform
+- **ASP.NET Core Minimal APIs** - High-performance web APIs
+- **.NET Aspire 9.5.1** - Local development orchestrator
+- **Azure Cosmos DB** - Primary database (using emulator for local dev)
+- **Redis** - Caching layer (using container for local dev)
+- **OpenTelemetry** - Observability (logs, metrics, traces)
+- **xUnit + FluentAssertions** - Testing framework
+
+## Prerequisites
+
+- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop) (for Redis and Cosmos DB emulator)
+- [Visual Studio 2022 17.14+](https://visualstudio.microsoft.com/) or [VS Code](https://code.visualstudio.com/) with C# Dev Kit
+
+## Getting Started
+
+### 1. Clone the repository
+
+```bash
+git clone <repository-url>
+cd marketing-agents
+```
+
+### 2. Restore dependencies
+
+```bash
+dotnet restore
+```
+
+### 3. Run the application
+
+```bash
+dotnet run --project MarketingAgents.AppHost
+```
+
+This will:
+- Start the Aspire dashboard (typically at `http://localhost:15888`)
+- Launch Redis container
+- Launch Cosmos DB emulator
+- Start the API service
+- Start the AgentHost service
+
+### 4. Access the services
+
+- **Aspire Dashboard**: `http://localhost:15888`
+- **API Service**: `http://localhost:<port>` (check Aspire dashboard for actual port)
+- **Swagger UI**: `http://localhost:<port>/swagger`
+- **AgentHost Service**: `http://localhost:<port>` (check Aspire dashboard for actual port)
+
+## Development
+
+### Project Structure
+
+```
+MarketingAgents/
+├── MarketingAgents.AppHost/          # Aspire orchestration
+├── MarketingAgents.Api/              # API service
+│   ├── Endpoints/                    # Minimal API endpoints
+│   ├── Services/                     # Business logic
+│   ├── Models/                       # DTOs and domain entities
+│   └── Data/                         # Cosmos DB repositories
+├── MarketingAgents.AgentHost/        # Agent service
+│   ├── Agents/                       # Agent providers
+│   └── Services/                     # Orchestration services
+├── MarketingAgents.ServiceDefaults/  # Shared configurations
+├── MarketingAgents.Api.Tests/        # Unit tests
+└── MarketingAgents.Api.IntegrationTests/ # Integration tests
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+dotnet test
+
+# Run with coverage
+dotnet test --collect:"XPlat Code Coverage"
+```
+
+### Building
+
+```bash
+# Build all projects
+dotnet build
+
+# Build specific project
+dotnet build MarketingAgents.Api
+```
+
+### Code Quality
+
+This project uses:
+- **Nullable reference types** - Enabled across all projects
+- **EditorConfig** - Consistent coding standards
+- **StyleCop Analyzers** - C# style rules
+- **SonarAnalyzer** - Code quality and security rules
+
+All warnings are treated as errors to maintain high code quality.
+
+## Configuration
+
+### User Secrets
+
+For local development, use .NET User Secrets:
+
+```bash
+# Set a secret for the API project
+dotnet user-secrets set "ConnectionStrings:CosmosDb" "<connection-string>" --project MarketingAgents.Api
+```
+
+### Environment Variables
+
+Key environment variables:
+- `OTEL_EXPORTER_OTLP_ENDPOINT` - OpenTelemetry collector endpoint
+- `ASPNETCORE_ENVIRONMENT` - Environment name (Development, Staging, Production)
+
+## Documentation
+
+See the `/docs` folder for detailed documentation:
+- Architecture overview
+- API documentation
+- Development guidelines
+- Deployment procedures
+
+## Contributing
+
+1. Follow the coding standards defined in `.editorconfig`
+2. Ensure all tests pass before submitting PR
+3. Maintain ≥85% code coverage
+4. Update documentation as needed
+
+## License
+
+[Add your license here]
+
 
 https://github.com/user-attachments/assets/f0529e70-f437-4a14-93bc-4ab5a0450540
 
