@@ -134,11 +134,82 @@ Key environment variables:
 
 ## Documentation
 
-See the `/docs` folder for detailed documentation:
-- Architecture overview
-- API documentation
-- Development guidelines
-- Deployment procedures
+### Building and Viewing Documentation
+
+This project uses **MkDocs with Material theme** for comprehensive documentation. All documentation lives in the `docs/` directory and is deployed automatically to GitHub Pages.
+
+#### Local Development
+
+```bash
+# Install MkDocs and dependencies (first time only)
+pip install mkdocs-material mkdocs-git-revision-date-localized-plugin mkdocs-minify-plugin
+
+# Serve documentation locally
+npm run docs:serve
+# OR
+mkdocs serve
+
+# Access at http://localhost:8000/marketing-agents/
+```
+
+#### Building Documentation
+
+```bash
+# Build documentation
+npm run docs:build
+# OR
+mkdocs build
+
+# Build with strict validation (recommended before committing)
+npm run docs:build:strict
+# OR
+mkdocs build --strict
+```
+
+#### CI/CD
+
+Documentation is automatically built and deployed to GitHub Pages on every push to `main` that affects:
+- `docs/**` - Documentation markdown files
+- `mkdocs.yml` - MkDocs configuration
+- `specs/adr/**` - Architecture Decision Records
+
+**Live Documentation**: [View on GitHub Pages](https://your-org.github.io/marketing-agents/)
+
+#### Documentation Structure
+
+```
+docs/
+├── index.md                      # Landing page
+├── getting-started/
+│   ├── installation.md           # Setup instructions
+│   ├── quick-start.md            # 5-minute tutorial
+│   └── configuration.md          # Configuration guide
+├── architecture/
+│   ├── overview.md               # High-level architecture
+│   ├── system-design.md          # Detailed system design
+│   ├── data-flow.md              # Data flows and transformations
+│   └── decisions.md              # ADR index
+├── api/
+│   ├── rest-api.md               # REST API reference
+│   └── realtime-api.md           # SignalR WebSocket API
+├── guides/
+│   ├── development.md            # Development workflow
+│   ├── deployment.md             # Azure deployment procedures
+│   └── troubleshooting.md        # Common issues and solutions
+└── reference/
+    ├── configuration.md          # Configuration options
+    └── environment-variables.md  # Environment variables reference
+
+specs/
+├── prd.md                        # Product Requirements
+├── adr/                          # Architecture Decision Records
+│   ├── template.md               # MADR template
+│   ├── 0001-use-aspire-for-orchestration.md
+│   └── 0002-use-mkdocs-for-documentation.md
+├── features/                     # Feature specifications
+├── tasks/                        # Technical task specs
+└── journal/                      # Engineering journal
+```
 
 ## Contributing
 

@@ -13,14 +13,14 @@ Architecture Decision Records (ADRs) capture important architectural decisions m
 
 ## Active ADRs
 
-### [ADR 0001: Backend Scaffolding Architecture - .NET 9 with Aspire Orchestration](#adr-0001)
+### ADR 0001: Use .NET Aspire for Local Development Orchestration
 
 **Status**: ✅ Accepted  
-**Date**: 2025-01-XX
+**Date**: 2025-10-29
 
-**Summary**: Chose a monorepo architecture with .NET Aspire orchestration over single monolithic project or multi-repo microservices.
+**Summary**: Chose .NET Aspire for local development orchestration over Docker Compose or manual service startup.
 
-**Full ADR**: See `/specs/adr/0001-backend-scaffolding-architecture.md` in the repository
+**Full ADR**: See `/specs/adr/0001-use-aspire-for-orchestration.md` in the repository
 
 **Key Decision**: Use .NET Aspire for local development orchestration with separate Api and AgentHost services.
 
@@ -44,47 +44,79 @@ Architecture Decision Records (ADRs) capture important architectural decisions m
 
 ---
 
+### ADR 0002: Use MkDocs with Material Theme for Documentation
+
+**Status**: ✅ Accepted  
+**Date**: 2025-10-29
+
+**Summary**: Chose MkDocs with Material theme for project documentation over Docusaurus or GitHub Wiki.
+
+**Full ADR**: See `/specs/adr/0002-use-mkdocs-for-documentation.md` in the repository
+
+**Key Decision**: Use MkDocs with Material theme for all project documentation.
+
+**Rationale**:
+- Markdown-based documentation lives alongside code
+- Fast build times (< 3 seconds) with `mkdocs build --strict`
+- Professional Material theme with built-in search and dark mode
+- Simple GitHub Pages deployment via GitHub Actions
+- Excellent plugin ecosystem (git-revision-date, minify, Mermaid diagrams)
+
+**Trade-offs**:
+- ✅ Simple Markdown workflow familiar to developers
+- ✅ Static site with no backend dependencies
+- ✅ Client-side search with instant results
+- ⚠️ Requires Python for local documentation development
+- ⚠️ Less interactive than React-based solutions like Docusaurus
+
+**Alternatives Considered**:
+1. **Docusaurus**: React-based with powerful customization but more complex
+2. **GitHub Wiki**: Zero setup but limited features and separate repository
+3. **MkDocs with Material** ✅: Best balance of simplicity and features
+
+---
+
 ## Upcoming ADRs
 
 The following ADRs are planned for future implementation tasks:
 
-### ADR 0002: Database Persistence Strategy (Azure Cosmos DB)
+### ADR 0003: Database Persistence Strategy (Azure Cosmos DB)
 **Status**: 🚧 Planned  
 **Related Task**: See `/specs/tasks/004-task-campaign-persistence-model.md` in the repository
 
 Decision on database choice, schema design, and data access patterns.
 
-### ADR 0003: Real-Time Communication Architecture (SignalR)
+### ADR 0004: Real-Time Communication Architecture (SignalR)
 **Status**: 🚧 Planned  
 **Related Task**: See `/specs/tasks/012-task-realtime-signalr-backend.md` in the repository
 
 Decision on real-time communication protocol (SignalR vs WebSockets vs SSE).
 
-### ADR 0004: Agent Orchestration Patterns (Microsoft Agent Framework)
+### ADR 0005: Agent Orchestration Patterns (Microsoft Agent Framework)
 **Status**: 🚧 Planned  
 **Related Task**: See `/specs/tasks/010-task-campaign-orchestration.md` in the repository
 
 Decision on agent coordination patterns (sequential vs concurrent vs event-driven).
 
-### ADR 0005: Deployment Strategy (Azure Container Apps vs Kubernetes)
+### ADR 0006: Deployment Strategy (Azure Container Apps vs Kubernetes)
 **Status**: 🚧 Planned  
 **Related Task**: See `/specs/tasks/020-task-cicd-deployment.md` in the repository
 
 Decision on production deployment platform and infrastructure as code approach.
 
-### ADR 0006: Frontend State Management
+### ADR 0007: Frontend State Management
 **Status**: 🚧 Planned  
 **Related Task**: Task 002 (Frontend Scaffolding)
 
 Decision on state management approach (TanStack Query + Zustand vs Redux vs Jotai).
 
-### ADR 0007: API Contract Strategy (OpenAPI)
+### ADR 0008: API Contract Strategy (OpenAPI)
 **Status**: 🚧 Planned  
 **Related Task**: See `/specs/tasks/013-task-campaign-api-endpoints.md` in the repository
 
 Decision on API schema generation, SDK client generation, and contract testing approach.
 
-### ADR 0008: Campaign Iteration Feedback Loop
+### ADR 0009: Campaign Iteration Feedback Loop
 **Status**: 🚧 Planned  
 **Related Task**: See `/specs/tasks/011-task-iteration-feedback-loop.md` in the repository
 

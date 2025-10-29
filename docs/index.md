@@ -70,9 +70,9 @@ marketing-agents/
 Follow these steps to get started with the Marketing Agents Platform:
 
 1. **[Install Prerequisites](getting-started/installation.md)** - .NET 9 SDK, Docker, Azure CLI
-2. **[Clone and Configure](getting-started/quick-start.md#step-1-clone-repository)** - Get the source code and configure environment
-3. **[Run Locally](getting-started/quick-start.md#step-3-run-aspire-dashboard)** - Start the Aspire dashboard and services
-4. **[Explore the API](getting-started/quick-start.md#step-5-explore-api)** - Test endpoints via Swagger UI
+2. **[Clone and Configure](getting-started/quick-start.md)** - Get the source code and configure environment
+3. **[Run Locally](getting-started/quick-start.md)** - Start the Aspire dashboard and services
+4. **[Explore the API](getting-started/quick-start.md)** - Test endpoints via Swagger UI
 
 ## Support
 

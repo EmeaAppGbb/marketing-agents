@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "prepare": "husky"
+    "prepare": "husky",
+    "docs:serve": "mkdocs serve",
+    "docs:build": "mkdocs build",
+    "docs:build:strict": "mkdocs build --strict"
   },
   "devDependencies": {
     "husky": "^9.1.7",
