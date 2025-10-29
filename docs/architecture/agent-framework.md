@@ -390,6 +390,114 @@ public class AgentOrchestratorTests
 }
 ```
 
+## Implemented Agents
+
+### Copywriting Agent
+
+The Copywriting Agent generates marketing copy with multiple headline variants, body copy in different length tiers, and diverse CTA suggestions.
+
+**Capabilities:**
+- Generate ≥3 distinct headline options (optimized for 50-60 characters)
+- Create body copy in three length tiers: short (50-100 words), medium (100-200 words), long (200-400 words)
+- Produce ≥3 diverse CTA suggestions
+- Support iterative refinement based on revision feedback
+- Validate outputs against best practices (headline length, tone alignment, semantic diversity)
+
+**Tools:**
+
+1. **ValidateHeadlineLengthTool**: Validates headline character count against best practices (50-60 chars optimal)
+   - Returns guidance for headlines that are too short (< 30), acceptable (30-45), optimal (46-60), slightly long (61-70), or too long (> 70)
+   - Used by LLM to self-correct headline length before returning results
+
+2. **AnalyzeToneAlignmentTool**: Analyzes copy against tone guidelines using keyword indicators
+   - Supports tones: professional, playful, empathetic, urgent, innovative, trustworthy
+   - Returns adherence percentage and qualitative assessment (Excellent/Strong/Moderate/Weak alignment)
+   - Helps LLM ensure generated copy matches requested brand voice
+
+3. **CheckSemanticDiversityTool**: Measures semantic diversity among headline variants using bigram overlap heuristic
+   - Calculates diversity score (0.0 = identical, 1.0 = completely different)
+   - Provides recommendations when diversity falls below 0.6 threshold
+   - Encourages LLM to generate truly distinct headline options
+
+**Request Model:**
+
+```csharp
+public record CopywritingRequest
+{
+    public required string CampaignBrief { get; init; }
+    public string[]? ToneGuidelines { get; init; }
+    public LengthTier[]? LengthPreferences { get; init; }
+    public string? RevisionFeedback { get; init; }
+    public CopywritingResponse? PreviousVersion { get; init; }
+}
+```
+
+**Response Model:**
+
+```csharp
+public record CopywritingResponse
+{
+    public required string[] Headlines { get; init; }
+    public string? BodyCopyShort { get; init; }
+    public string? BodyCopyMedium { get; init; }
+    public string? BodyCopyLong { get; init; }
+    public required string[] CTAs { get; init; }
+    public DateTimeOffset GeneratedAt { get; init; } = DateTimeOffset.UtcNow;
+}
+```
+
+**Usage Example:**
+
+```csharp
+public class CampaignController
+{
+    private readonly ICopywritingService _copywritingService;
+
+    [HttpPost("campaigns/{id}/copy")]
+    public async Task<IActionResult> GenerateCopy(
+        [FromRoute] string id,
+        [FromBody] CopywritingRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await _copywritingService.GenerateAsync(request, cancellationToken);
+        return result.Success ? Ok(result.Data) : Problem(result.ErrorMessage);
+    }
+
+    [HttpPost("campaigns/{id}/copy/regenerate")]
+    public async Task<IActionResult> RegenerateCopy(
+        [FromRoute] string id,
+        [FromBody] CopywritingRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(request.RevisionFeedback))
+        {
+            return BadRequest("Revision feedback is required for regeneration");
+        }
+
+        var result = await _copywritingService.RegenerateAsync(request, cancellationToken);
+        return result.Success ? Ok(result.Data) : Problem(result.ErrorMessage);
+    }
+}
+```
+
+**Retry Strategy:**
+
+The CopywritingService implements exponential backoff with a maximum of 3 retry attempts:
+- Attempt 1: Immediate execution
+- Attempt 2: Wait 2 seconds (2^1)
+- Attempt 3: Wait 4 seconds (2^2)
+
+Each retry receives the full campaign brief, tone guidelines, and any previous rejection feedback to improve generation quality.
+
+**Testing:**
+
+All three tools have comprehensive unit test coverage (83-96%):
+- ValidateHeadlineLengthTool: 6 test cases covering various length ranges
+- AnalyzeToneAlignmentTool: 8 test cases for tone keyword matching and edge cases
+- CheckSemanticDiversityTool: 7 test cases for diversity scoring and input validation
+
+The provider and service layers have basic constructor and null validation tests. Integration tests with mocked IChatClient responses are recommended to achieve ≥85% coverage.
+
 ## Best Practices
 
 1. **Always use IChatClient abstraction**: Never directly instantiate Azure AI clients
@@ -399,6 +507,7 @@ public class AgentOrchestratorTests
 5. **Type-safe results**: Use generic type parameters for compile-time safety
 6. **Structured logging**: Include correlation IDs in all log messages
 7. **Test in isolation**: Mock `IChatClient` to avoid live API calls in tests
+8. **Register tools via AIFunctionFactory**: Use `AIFunctionFactory.Create()` with Description attributes for declarative tool registration
 
 ## Troubleshooting
 

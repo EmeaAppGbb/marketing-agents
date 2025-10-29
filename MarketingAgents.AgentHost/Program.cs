@@ -2,6 +2,7 @@
 
 using MarketingAgents.AgentHost.Models.Configuration;
 using MarketingAgents.AgentHost.Orchestration;
+using MarketingAgents.AgentHost.Providers;
 using MarketingAgents.AgentHost.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,7 +29,13 @@ builder.AddAzureChatCompletionsClient("chat");
 // This is automatically configured by AddAzureChatCompletionsClient
 // and available for dependency injection in agent providers
 
-// Register core agent services
+// Register agent providers
+builder.Services.AddScoped<CopywritingAgentProvider>();
+
+// Register agent services
+builder.Services.AddScoped<ICopywritingService, CopywritingService>();
+
+// Register core orchestration services
 builder.Services.AddSingleton<RetryPolicyService>();
 builder.Services.AddScoped<IAgentOrchestrator, AgentOrchestrator>();
 
