@@ -76,47 +76,91 @@ Architecture Decision Records (ADRs) capture important architectural decisions m
 
 ---
 
+### ADR 0003: Database Persistence Strategy (Azure Cosmos DB)
+
+**Status**: ✅ Superseded by ADR-0004  
+**Related Task**: See `/specs/tasks/004-task-campaign-persistence-model.md` in the repository
+
+This ADR was superseded by ADR-0004 which provides more detailed analysis of persistence options.
+
+---
+
+### ADR 0004: Cosmos DB Native SDK for Data Persistence
+
+**Status**: ✅ Accepted  
+**Date**: 2025-01-XX
+
+**Summary**: Chose Azure Cosmos DB with native .NET SDK over Entity Framework Core or Dapper for campaign data persistence.
+
+**Full ADR**: See `/specs/adr/0004-cosmos-db-native-sdk-persistence.md` in the repository
+
+**Key Decision**: Use Azure Cosmos DB with the native `Microsoft.Azure.Cosmos` SDK (version 3.53.1+) and Aspire integration (`Aspire.Microsoft.Azure.Cosmos` 9.5.1) for all data persistence.
+
+**Rationale**:
+- **Performance**: Direct SDK access eliminates ORM overhead for NoSQL operations
+- **Aspire Integration**: Automatic service discovery, connection management, and emulator support
+- **Full Feature Access**: Native SDK provides complete access to Cosmos DB capabilities (change feed, bulk operations, transactional batches)
+- **Type Safety**: C# record types with required properties and init-only setters for immutable entities
+- **AGENTS.md Compliance**: Explicitly required to use native SDK, not Entity Framework
+
+**Architecture**:
+- **Database**: `marketingagents` with 6 containers
+- **Partition Key Strategy**: Campaign ID for all entities (data co-location)
+- **Repository Pattern**: Interface-based repositories with scoped DI lifetime
+- **Auto-Initialization**: `CosmosDbInitializationService` creates containers in development
+- **Performance Target**: Campaign snapshot retrieval ≤500ms
+
+**Trade-offs**:
+- ✅ Maximum performance and control over queries
+- ✅ Full access to Cosmos DB-specific features
+- ✅ Aspire integration provides excellent developer experience
+- ⚠️ More verbose query code compared to LINQ providers
+- ⚠️ Manual schema management (no automatic migrations)
+
+**Alternatives Considered**:
+1. **Entity Framework Core with Cosmos DB Provider**: Rejected - violates AGENTS.md requirement, adds abstraction overhead, missing features
+2. **Dapper + Cosmos DB**: Rejected - unnecessary abstraction layer, limited Cosmos DB feature support
+3. **Native Cosmos DB SDK** ✅: Best fit for requirements, performance, and Aspire integration
+
+**Related Documentation**: See [Data Model & Persistence](persistence.md) for complete implementation details.
+
+---
+
 ## Upcoming ADRs
 
 The following ADRs are planned for future implementation tasks:
 
-### ADR 0003: Database Persistence Strategy (Azure Cosmos DB)
-**Status**: 🚧 Planned  
-**Related Task**: See `/specs/tasks/004-task-campaign-persistence-model.md` in the repository
-
-Decision on database choice, schema design, and data access patterns.
-
-### ADR 0004: Real-Time Communication Architecture (SignalR)
+### ADR 0005: Real-Time Communication Architecture (SignalR)
 **Status**: 🚧 Planned  
 **Related Task**: See `/specs/tasks/012-task-realtime-signalr-backend.md` in the repository
 
 Decision on real-time communication protocol (SignalR vs WebSockets vs SSE).
 
-### ADR 0005: Agent Orchestration Patterns (Microsoft Agent Framework)
+### ADR 0006: Agent Orchestration Patterns (Microsoft Agent Framework)
 **Status**: 🚧 Planned  
 **Related Task**: See `/specs/tasks/010-task-campaign-orchestration.md` in the repository
 
 Decision on agent coordination patterns (sequential vs concurrent vs event-driven).
 
-### ADR 0006: Deployment Strategy (Azure Container Apps vs Kubernetes)
+### ADR 0007: Deployment Strategy (Azure Container Apps vs Kubernetes)
 **Status**: 🚧 Planned  
 **Related Task**: See `/specs/tasks/020-task-cicd-deployment.md` in the repository
 
 Decision on production deployment platform and infrastructure as code approach.
 
-### ADR 0007: Frontend State Management
+### ADR 0008: Frontend State Management
 **Status**: 🚧 Planned  
 **Related Task**: Task 002 (Frontend Scaffolding)
 
 Decision on state management approach (TanStack Query + Zustand vs Redux vs Jotai).
 
-### ADR 0008: API Contract Strategy (OpenAPI)
+### ADR 0009: API Contract Strategy (OpenAPI)
 **Status**: 🚧 Planned  
 **Related Task**: See `/specs/tasks/013-task-campaign-api-endpoints.md` in the repository
 
 Decision on API schema generation, SDK client generation, and contract testing approach.
 
-### ADR 0009: Campaign Iteration Feedback Loop
+### ADR 0010: Campaign Iteration Feedback Loop
 **Status**: 🚧 Planned  
 **Related Task**: See `/specs/tasks/011-task-iteration-feedback-loop.md` in the repository
 

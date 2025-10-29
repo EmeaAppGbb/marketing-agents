@@ -256,38 +256,148 @@ Please regenerate the copy incorporating this feedback while maintaining brand c
 
 ### Cosmos DB Queries
 
-#### Retrieve Campaign with Artifacts
+> **Note**: For complete data model details, entity schemas, and partition key strategy, see [Persistence Layer Documentation](persistence.md).
+
+#### Retrieve Campaign Snapshot (Optimized for Dashboard)
+
 ```csharp
-var container = cosmosClient.GetContainer("marketing", "campaigns");
+// Uses the repository pattern for aggregated view
+var snapshot = await _campaignRepository.GetCampaignSnapshotAsync(campaignId);
 
-// Efficient query using partition key
-var query = container.GetItemLinqQueryable<Campaign>(
-    requestOptions: new QueryRequestOptions
-    {
-        PartitionKey = new PartitionKey(campaignId)
-    })
-    .Where(c => c.Id == campaignId);
-
-var campaign = await query.ToFeedIterator().ReadNextAsync();
+// Returns:
+// - Campaign entity
+// - Active artifact versions (per type)
+// - Audit reports for each version
+// Target: ≤500ms retrieval time
 ```
 
-#### Stream Artifacts by Type
+**Implementation** (from `CampaignRepository`):
 ```csharp
-var container = cosmosClient.GetContainer("marketing", "artifacts");
+public async Task<CampaignSnapshot?> GetCampaignSnapshotAsync(
+    string id, 
+    CancellationToken cancellationToken = default)
+{
+    // 1. Point read for campaign (fastest operation)
+    var campaign = await GetByIdAsync(id, cancellationToken);
+    if (campaign is null) return null;
 
-// Query artifacts by campaign and type
-var query = container.GetItemLinqQueryable<CampaignArtifact>(
+    // 2. Fetch active versions in parallel
+    var activeVersions = new Dictionary<ArtifactType, ArtifactVersion>();
+    var auditReports = new Dictionary<string, AuditReport>();
+
+    if (campaign.ActiveVersionIds is not null)
+    {
+        var versionTasks = campaign.ActiveVersionIds.Select(async kvp =>
+        {
+            var version = await _versionRepository.GetByIdAsync(
+                kvp.Value, 
+                campaign.Id, 
+                cancellationToken);
+            return (Type: kvp.Key, Version: version);
+        });
+
+        var versions = await Task.WhenAll(versionTasks);
+
+        foreach (var (type, version) in versions)
+        {
+            if (version is not null)
+            {
+                activeVersions[type] = version;
+
+                // 3. Fetch audit report if available
+                if (version.AuditReportId is not null)
+                {
+                    var audit = await _auditReportRepository.GetByIdAsync(
+                        version.AuditReportId, 
+                        campaign.Id, 
+                        cancellationToken);
+                    
+                    if (audit is not null)
+                    {
+                        auditReports[version.Id] = audit;
+                    }
+                }
+            }
+        }
+    }
+
+    return new CampaignSnapshot
+    {
+        Campaign = campaign,
+        ActiveVersions = activeVersions,
+        AuditReports = auditReports,
+    };
+}
+```
+
+#### Query Artifacts by Campaign and Type
+
+```csharp
+// Uses QueryDefinition with partition key for efficiency
+var query = new QueryDefinition(
+    "SELECT * FROM c WHERE c.campaignId = @campaignId AND c.type = @type ORDER BY c.createdAt DESC")
+    .WithParameter("@campaignId", campaignId)
+    .WithParameter("@type", "Copy");
+
+using var feed = _container.GetItemQueryIterator<Artifact>(
+    query,
     requestOptions: new QueryRequestOptions
     {
-        PartitionKey = new PartitionKey(campaignId)
-    })
-    .Where(a => a.Type == ArtifactType.Copy)
-    .OrderByDescending(a => a.CreatedAt);
+        PartitionKey = new PartitionKey(campaignId), // Scoped to single partition
+    });
 
-await foreach (var artifact in query.ToFeedIterator())
+var artifacts = new List<Artifact>();
+while (feed.HasMoreResults)
 {
-    // Process artifact
+    var response = await feed.ReadNextAsync();
+    artifacts.AddRange(response);
 }
+```
+
+#### Retrieve All Versions for an Artifact
+
+```csharp
+// Implementation from ArtifactVersionRepository
+public async Task<IReadOnlyList<ArtifactVersion>> GetByArtifactIdAsync(
+    string artifactId, 
+    string campaignId, 
+    CancellationToken cancellationToken = default)
+{
+    var query = new QueryDefinition(
+        "SELECT * FROM c WHERE c.artifactId = @artifactId ORDER BY c.versionNumber DESC")
+        .WithParameter("@artifactId", artifactId);
+
+    using var feed = _container.GetItemQueryIterator<ArtifactVersion>(
+        query,
+        requestOptions: new QueryRequestOptions
+        {
+            PartitionKey = new PartitionKey(campaignId),
+        });
+
+    var versions = new List<ArtifactVersion>();
+    while (feed.HasMoreResults)
+    {
+        var response = await feed.ReadNextAsync(cancellationToken);
+        versions.AddRange(response);
+    }
+
+    return versions.AsReadOnly();
+}
+```
+
+#### Point Read (Fastest Query Pattern)
+
+```csharp
+// Used throughout repositories for maximum performance
+var response = await _container.ReadItemAsync<Campaign>(
+    id: campaignId,
+    partitionKey: new PartitionKey(campaignId),
+    cancellationToken: cancellationToken);
+
+return response.Resource;
+
+// Performance: Sub-millisecond latency
+// Cost: 1 RU per operation
 ```
 
 ### Redis Caching Patterns
