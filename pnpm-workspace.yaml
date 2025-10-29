@@ -1,0 +1,3 @@
+packages:
+  - 'MarketingAgents.Web'
+  - 'packages/*'

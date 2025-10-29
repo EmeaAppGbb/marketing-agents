@@ -22,6 +22,8 @@ cd marketing-agents
 
 ## Step 2: Restore Dependencies
 
+### Backend Dependencies
+
 Restore all NuGet packages using Central Package Management:
 
 ```bash
@@ -37,6 +39,27 @@ Restored MarketingAgents.AgentHost (in 1.3s)
 Restored MarketingAgents.AppHost (in 0.8s)
 Restore succeeded.
 ```
+
+### Frontend Dependencies
+
+Install Node.js packages for the frontend application:
+
+```bash
+pnpm install
+```
+
+Expected output:
+```
+Scope: all 2 workspace projects
+Lockfile is up to date, resolution step is skipped
+Packages: +618
+++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 618, reused 618, downloaded 0, added 618, done
+Done in 5.3s
+```
+
+!!! note "Workspace Mode"
+    The project uses pnpm workspace mode. Running `pnpm install` at the repository root installs dependencies for all workspace packages, including `MarketingAgents.Web`.
 
 ## Step 3: Run Aspire Dashboard
 
@@ -76,6 +99,7 @@ In the Aspire dashboard Resources tab, you should see:
 |----------|------|-------|----------|
 | **apiservice** | Project | Running | http://localhost:5001 |
 | **agenthost** | Project | Running | http://localhost:5002 |
+| **webapp** | NPM App | Running | http://localhost:3000 |
 | **cache** (Redis) | Container | Running | localhost:6379 |
 | **cosmosdb** (Emulator) | Container | Running | https://localhost:8081 |
 
@@ -110,9 +134,23 @@ Expected response:
 }
 ```
 
-## Step 5: Explore API
+## Step 5: Explore the Application
 
-### Open Swagger UI
+### Access the Frontend
+
+Navigate to the web application in your browser:
+
+**http://localhost:3000**
+
+You'll see the Marketing Agents Platform home page with:
+- Campaign creation interface
+- Campaign listing and management
+- Real-time updates via SignalR
+
+!!! tip "Hot Module Replacement"
+    The frontend uses Next.js Fast Refresh. Changes to React components are reflected instantly without losing component state.
+
+### Open Swagger UI (Backend API)
 
 Navigate to the API's Swagger documentation:
 
@@ -171,8 +209,10 @@ Expected response:
 
 Execute the test suite to verify everything is working:
 
+### Backend Tests
+
 ```bash
-# Run all tests
+# Run all backend tests
 dotnet test
 
 # Run with detailed output
@@ -192,6 +232,42 @@ Total tests: 2
      Passed: 2
 ```
 
+### Frontend Tests
+
+Run unit tests for the frontend application:
+
+```bash
+cd MarketingAgents.Web
+pnpm test
+```
+
+Expected output:
+```
+✓ src/components/campaign-card.test.tsx (6 tests) 237ms
+   ✓ Campaign Card Component (6 tests) 236ms
+     ✓ renders campaign information correctly
+     ✓ displays correct status styling
+     ✓ handles click events
+     ✓ handles keyboard events
+     ✓ renders error state correctly
+     ✓ formats dates correctly
+
+Test Files  1 passed (1)
+     Tests  6 passed (6)
+```
+
+Run frontend tests with coverage:
+
+```bash
+pnpm test:coverage
+```
+
+Run E2E tests with Playwright (requires running application):
+
+```bash
+pnpm test:e2e
+```
+
 ## What's Next?
 
 Now that you have the platform running:
@@ -199,8 +275,9 @@ Now that you have the platform running:
 1. **[Configuration Guide](configuration.md)** - Customize settings and environment variables
 2. **[Architecture Overview](../architecture/overview.md)** - Understand the system design
 3. **[Development Setup](../development/setup.md)** - Set up your IDE and tools for development
-4. **Backend Development Guide** (coming soon) - Start building backend features
-5. **Testing Guide** (coming soon) - Write and run tests
+4. **Frontend Development** - Build UI features with Next.js, TanStack Query, and Zustand
+5. **Backend Development** - Create API endpoints and agent workflows
+6. **Testing Guide** - Write unit, integration, and E2E tests
 
 ## Troubleshooting
 
@@ -232,6 +309,7 @@ If you see "Address already in use" errors:
 
 ```bash
 # Check what's using the ports
+lsof -i :3000  # Frontend (webapp)
 lsof -i :5001  # API service
 lsof -i :5002  # AgentHost service
 lsof -i :6379  # Redis
@@ -239,6 +317,14 @@ lsof -i :8081  # Cosmos DB
 
 # Kill conflicting processes or change ports in appsettings.Development.json
 ```
+
+### Frontend Build Errors
+
+If the frontend fails to start:
+- Ensure all dependencies are installed: `pnpm install`
+- Clear Next.js cache: `cd MarketingAgents.Web && rm -rf .next`
+- Verify Node.js version: `node --version` (should be v20 or later)
+- Check for TypeScript errors: `cd MarketingAgents.Web && pnpm tsc --noEmit`
 
 ### Performance Issues
 

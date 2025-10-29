@@ -16,7 +16,8 @@ var apiService = builder.AddProject<Projects.MarketingAgents_Api>("apiservice")
     .WithReference(cache)
     .WaitFor(cache)
     .WithReference(cosmosDb)
-    .WaitFor(cosmosDb);
+    .WaitFor(cosmosDb)
+    .WithExternalHttpEndpoints();
 
 // Add AgentHost service with references to dependencies
 builder.AddProject<Projects.MarketingAgents_AgentHost>("agenthost")
@@ -25,5 +26,13 @@ builder.AddProject<Projects.MarketingAgents_AgentHost>("agenthost")
     .WithReference(cosmosDb)
     .WaitFor(cosmosDb)
     .WithReference(apiService);
+
+// Add Next.js frontend with reference to API service
+builder.AddNpmApp("webapp", "../MarketingAgents.Web", "dev")
+    .WithReference(apiService)
+    .WaitFor(apiService)
+    .WithHttpEndpoint(env: "PORT", port: 3000)
+    .WithExternalHttpEndpoints()
+    .PublishAsDockerFile();
 
 await builder.Build().RunAsync();
