@@ -48,6 +48,7 @@ Write the implementation code following:
 - Architectural patterns defined in the project
 - Type-safety requirements
 - Modular, self-contained design principles
+- Before implementing new functionality, check for existing implementations to avoid duplication
 
 ### 7. Write Unit Tests
 Create unit tests to verify the implementation:

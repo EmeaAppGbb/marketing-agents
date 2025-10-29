@@ -104,6 +104,7 @@ nav:
   - Architecture:
       - Overview: architecture/overview.md
       - System Design: architecture/system-design.md
+      - Agent Framework: architecture/agent-framework.md
       - Data Flow: architecture/data-flow.md
       - Data Model & Persistence: architecture/persistence.md
       - Decisions (ADRs): architecture/decisions.md

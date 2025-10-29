@@ -13,6 +13,15 @@ Build agents and applications that turn specifications into production-ready exp
 - **Quality gates first:** Unit, integration, contract, and e2e tests run on every PR. Blocks merge when coverage or quality thresholds dip below agreed budgets (≥85% coverage).
 - **Observability by default:** Emit structured logs, traces, and metrics for every service. Expose key health indicators through standardized dashboards and alerting.
 - **Security & compliance everywhere:** Least privilege access, secret scanning, dependency hygiene, and threat modeling are non-negotiable steps in planning and delivery.
+- **Never reinvent the wheel:** NEVER implement features that already exist in established frameworks and libraries. Always leverage existing, well-tested implementations from the canonical stack.
+  - **Do NOT** implement custom agent orchestration logic—use Microsoft Agent Framework
+  - **Do NOT** implement custom OAuth 2.0 flows—use Microsoft Identity Platform (MSAL)
+  - **Do NOT** implement custom authentication/authorization—use ASP.NET Core Identity or Microsoft Entra ID
+  - **Do NOT** implement custom real-time communication protocols—use SignalR
+  - **Do NOT** implement custom HTTP resilience patterns—use Polly via Microsoft.Extensions.Http.Resilience
+  - **Do NOT** implement custom telemetry—use OpenTelemetry via Aspire ServiceDefaults
+  - **Do NOT** implement custom service discovery—use .NET Aspire service discovery
+  - When in doubt, research the framework/library documentation first using Microsoft Docs MCP to find existing solutions
 - **Always use latest packages:** Always fetch and use the latest stable versions of packages and dependencies unless there's a specific compatibility constraint. Update dependencies regularly.
   - Backend: Latest NuGet packages
   - Frontend: Latest npm packages

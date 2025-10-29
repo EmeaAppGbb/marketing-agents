@@ -11,6 +11,12 @@ var cosmosDb = builder.AddAzureCosmosDB("cosmosdb")
                      emulator => emulator.WithDataExplorer())
     .AddCosmosDatabase("marketingagents");
 
+// Add Azure AI Foundry for agent framework
+// For local development, configure via user secrets or appsettings:
+// - Azure:AIFoundry:Endpoint (e.g., "https://{resource}.api.azureml.ms")
+var foundry = builder.AddAzureAIFoundry("foundry");
+var chatDeployment = foundry.AddDeployment("chat", "gpt-4o", "1", "Microsoft");
+
 // Add API service with references to dependencies
 var apiService = builder.AddProject<Projects.MarketingAgents_Api>("apiservice")
     .WithReference(cache)
@@ -25,7 +31,8 @@ builder.AddProject<Projects.MarketingAgents_AgentHost>("agenthost")
     .WaitFor(cache)
     .WithReference(cosmosDb)
     .WaitFor(cosmosDb)
-    .WithReference(apiService);
+    .WithReference(apiService)
+    .WithReference(chatDeployment);
 
 // Add Next.js frontend with reference to API service
 builder.AddNpmApp("webapp", "../MarketingAgents.Web", "dev")
