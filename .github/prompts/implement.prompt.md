@@ -1,5 +1,5 @@
 ---
-mode: dev
+agent: dev
 ---
 # Dev Team Implementation Flow
 
