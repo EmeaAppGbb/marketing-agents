@@ -422,3 +422,4 @@ appsettings.Development.json
 
 # Aspire generated manifests
 *.dcproj.user
+.azure
