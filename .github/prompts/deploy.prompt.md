@@ -1,5 +1,5 @@
 ---
-mode: azure
+agent: azure
 ---
 # Dev team flow steps
 

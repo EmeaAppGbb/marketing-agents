@@ -1,5 +1,5 @@
 ---
-mode: devlead
+agent: devlead
 ---
 # Generate AGENTS.md from Guidelines
 
